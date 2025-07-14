@@ -9,7 +9,7 @@ import Positions from "./Positions";
 import Zindex from "./Zindex";
 import Float from "./Float";
 import GridLayout from "./GridLayout.tsx";
-
+import Flex from "./Flex.tsx";
 
 export default function Lab2() {
   return (
@@ -81,5 +81,6 @@ export default function Lab2() {
       <Zindex />
       <Float />
       <GridLayout />
+      <Flex />
     </div>);
 }
