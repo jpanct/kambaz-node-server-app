@@ -12,9 +12,16 @@ import GridLayout from "./GridLayout.tsx";
 import Flex from "./Flex.tsx";
 import ReactIconsSampler
  from "./ReactIcons.tsx";
+import { Container } from "react-bootstrap";
+import Bootstrap from "./BootstrapGrids.tsx";
+import ScreenSizeLabel from "./ScreenSizeLabel.tsx";
+import BootstrapTables from "./BootstrapTables.tsx";
+import BootstrapLists from "./BootstrapLists.tsx";
+import BootstrapForms from "./BootstrapForms.tsx";
+import BootstrapNavigation from "./BootstrapNavigation.tsx";
 export default function Lab2() {
   return (
-    <div id="wd-lab2">
+        <Container>
       <h2>Lab 2 - Cascading Style Sheets</h2>
       <h3>Styling with the STYLE attribute</h3>
       <p>
@@ -84,5 +91,15 @@ export default function Lab2() {
       <GridLayout />
       <Flex />
       <ReactIconsSampler />
-    </div>);
+        <Bootstrap />
+      <ScreenSizeLabel />
+      <BootstrapTables />
+      <BootstrapLists />
+      <BootstrapForms/>
+      <BootstrapNavigation />
+
+         </Container>
+
+    );
+    
 }
