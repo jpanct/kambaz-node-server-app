@@ -3,11 +3,20 @@ import { Route, Routes, Navigate } from "react-router";
 import TOC from "./TOC/TOC";
 import Lab2 from "./Lab2";
 import Lab3 from "./Lab3";
+
 export default function Labs() {
   return (
     <div>
       <h1>Jamie Pan</h1>
       <h1>Labs</h1>
+      <a 
+        id="wd-github" 
+        href="https://github.com/jpanct/kambaz-react-web-app"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        GitHub Repository
+      </a>
       <TOC />
       <Routes>
         <Route path="/" element={<Navigate to="Lab1" />} />
@@ -16,4 +25,5 @@ export default function Labs() {
         <Route path="Lab3/*" element={<Lab3 />} />
       </Routes>
     </div>
-);}
+  );
+}
