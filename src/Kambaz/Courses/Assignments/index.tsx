@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import * as db from "../../Database";
 import { FaSearch } from "react-icons/fa";
 import { BsGripVertical } from "react-icons/bs";
 import { FaCheckCircle, FaEllipsisV } from "react-icons/fa";
@@ -6,6 +7,9 @@ import { FaCaretDown, FaPlus } from "react-icons/fa";
 import { IoDocumentTextOutline } from "react-icons/io5";
 
 export default function Assignments() {
+  const { cid } = useParams();
+  const assignments = db.assignments;
+  
   return (
     <div id="wd-assignments" className="container-fluid">
       <div className="row mb-4">
@@ -49,68 +53,30 @@ export default function Assignments() {
           </div>
           
           <ul className="list-group list-group-flush rounded-0">
-            <li className="list-group-item d-flex align-items-start">
-              <BsGripVertical className="me-2 fs-3 text-muted" />
-              <IoDocumentTextOutline className="me-3 fs-3 text-success" />
-              <div className="flex-grow-1">
-                <Link to="/Kambaz/Courses/1234/Assignments/123"
-                      className="text-decoration-none text-dark fw-bold">
-                  A1 - ENV + HTML
-                </Link>
-                <div className="small text-muted">
-                  <span className="text-danger">Multiple Modules</span> | <strong>Not available until</strong> May 6 at 12:00am |
-                </div>
-                <div className="small text-muted">
-                  <strong>Due</strong> May 13 at 11:59pm | 100 pts
-                </div>
-              </div>
-              <div className="ms-auto d-flex align-items-center">
-                <FaCheckCircle className="text-success me-2" />
-                <FaEllipsisV className="text-muted" />
-              </div>
-            </li>
-            
-            <li className="list-group-item d-flex align-items-start">
-              <BsGripVertical className="me-2 fs-3 text-muted" />
-              <IoDocumentTextOutline className="me-3 fs-3 text-success" />
-              <div className="flex-grow-1">
-                <Link to="/Kambaz/Courses/1234/Assignments/124"
-                      className="text-decoration-none text-dark fw-bold">
-                  A2 - CSS + BOOTSTRAP
-                </Link>
-                <div className="small text-muted">
-                  <span className="text-danger">Multiple Modules</span> | <strong>Not available until</strong> May 13 at 12:00am |
-                </div>
-                <div className="small text-muted">
-                  <strong>Due</strong> May 20 at 11:59pm | 100 pts
-                </div>
-              </div>
-              <div className="ms-auto d-flex align-items-center">
-                <FaCheckCircle className="text-success me-2" />
-                <FaEllipsisV className="text-muted" />
-              </div>
-            </li>
-            
-            <li className="list-group-item d-flex align-items-start">
-              <BsGripVertical className="me-2 fs-3 text-muted" />
-              <IoDocumentTextOutline className="me-3 fs-3 text-success" />
-              <div className="flex-grow-1">
-                <Link to="/Kambaz/Courses/1234/Assignments/125"
-                      className="text-decoration-none text-dark fw-bold">
-                  A3 - JAVASCRIPT + REACT
-                </Link>
-                <div className="small text-muted">
-                  <span className="text-danger">Multiple Modules</span> | <strong>Not available until</strong> May 20 at 12:00am |
-                </div>
-                <div className="small text-muted">
-                  <strong>Due</strong> May 27 at 11:59pm | 100 pts
-                </div>
-              </div>
-              <div className="ms-auto d-flex align-items-center">
-                <FaCheckCircle className="text-success me-2" />
-                <FaEllipsisV className="text-muted" />
-              </div>
-            </li>
+            {assignments
+              .filter((assignment: any) => assignment.course === cid)
+              .map((assignment: any) => (
+                <li key={assignment._id} className="list-group-item d-flex align-items-start">
+                  <BsGripVertical className="me-2 fs-3 text-muted" />
+                  <IoDocumentTextOutline className="me-3 fs-3 text-success" />
+                  <div className="flex-grow-1">
+                    <Link to={`/Kambaz/Courses/${cid}/Assignments/${assignment._id}`}
+                          className="text-decoration-none text-dark fw-bold">
+                      {assignment.title}
+                    </Link>
+                    <div className="small text-muted">
+                      <span className="text-danger">Multiple Modules</span> | <strong>Not available until</strong> {assignment.availableFrom} |
+                    </div>
+                    <div className="small text-muted">
+                      <strong>Due</strong> {assignment.dueDate} | {assignment.points} pts
+                    </div>
+                  </div>
+                  <div className="ms-auto d-flex align-items-center">
+                    <FaCheckCircle className="text-success me-2" />
+                    <FaEllipsisV className="text-muted" />
+                  </div>
+                </li>
+              ))}
           </ul>
         </li>
       </ul>

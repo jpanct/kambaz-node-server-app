@@ -1,12 +1,15 @@
-import Modules from "../Modules";
-export default function Home() {
+import { FaAlignJustify } from "react-icons/fa6";
+import { Navigate, Route, Routes, useParams } from "react-router";
+import { courses } from "../../Database";
+export default function Courses() {
+  const { cid } = useParams();
+  const course = courses.find((course) => course._id === cid);
   return (
-<div className="d-flex" id="wd-home">
-  <div className="flex-fill me-3">
-    <Modules />
-  </div>
-  <div className="d-none d-xl-block">
-  </div>
-</div>
-
-);}
+    <div id="wd-courses">
+      <h2 className="text-danger">
+        <FaAlignJustify className="me-4 fs-4 mb-1" />
+        {course && course.name}
+      </h2>
+    </div>
+  );
+}
