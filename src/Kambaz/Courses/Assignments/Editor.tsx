@@ -392,7 +392,7 @@ export default function AssignmentEditor() {
       <div className="alert alert-danger">
         <h4>Error loading Assignment Editor</h4>
         <p>Check console for details</p>
-        <pre>{error.toString()}</pre>
+      
       </div>
     );
   }

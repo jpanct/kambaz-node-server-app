@@ -1,5 +1,5 @@
 import { FaAlignJustify } from "react-icons/fa6";
-import { Navigate, Route, Routes, useParams } from "react-router";
+import { useParams } from "react-router";
 import { courses } from "../../Database";
 export default function Courses() {
   const { cid } = useParams();

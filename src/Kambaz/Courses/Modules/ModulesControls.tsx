@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Add this import
+import { useState } from "react"; // Add this import
 import { FaPlus } from "react-icons/fa6";
 import GreenCheckmark from "./GreenCheckmark";
 import { Button, Dropdown } from "react-bootstrap";

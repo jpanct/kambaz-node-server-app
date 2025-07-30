@@ -1,23 +1,60 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import Account from "./Account";
 import Dashboard from "./Dashboard";
 import KambazNavigation from "./Navigation";
 import Courses from "./Courses";
 import "./styles.css";
 import * as db from "./Database";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import ProtectedRoute from "./Account/ProtectedRoute";
+import { 
+  removeEnrollmentsForCourse, 
+  autoEnrollStudent 
+} from "./Enrollments/reducer";
+
+// Protected Course Route Component (inline)
+function ProtectedCourseRoute({ children }: { children: React.ReactNode }) {
+  const { cid } = useParams();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { enrollments } = useSelector((state: any) => state.enrollmentReducer);
+  
+  // Faculty can access all courses
+  if (currentUser?.role === "FACULTY") {
+    return <>{children}</>;
+  }
+  
+  // Check if student is enrolled
+  const isEnrolled = enrollments.some((e: any) => 
+    e.user === currentUser?._id && e.course === cid
+  );
+  
+  if (!isEnrolled) {
+    return <Navigate to="/Kambaz/Dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+}
 
 export default function Kambaz() {
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const dispatch = useDispatch();
+  
   const [courses, setCourses] = useState<any[]>(db.courses);
   const [course, setCourse] = useState<any>({
-    _id: "1234", name: "New Course", number: "New Number",
+    _id: "", name: "New Course", number: "New Number",
     startDate: "2023-09-10", endDate: "2023-12-15", description: "New Description",
   });
   
+  // Auto-enroll new students when they first load
+  useEffect(() => {
+    if (currentUser?.role === "STUDENT") {
+      dispatch(autoEnrollStudent({ userId: currentUser._id, courses }));
+    }
+  }, [currentUser, courses, dispatch]);
+  
   const addNewCourse = () => {
     setCourses([...courses, { ...course, _id: new Date().getTime().toString() }]);
-    // Reset form after adding
     setCourse({
       _id: "", name: "New Course", number: "New Number",
       startDate: "2023-09-10", endDate: "2023-12-15", description: "New Description",
@@ -26,6 +63,8 @@ export default function Kambaz() {
   
   const deleteCourse = (courseId: any) => {
     setCourses(courses.filter((course) => course._id !== courseId));
+    // Also remove enrollments for deleted course
+    dispatch(removeEnrollmentsForCourse(courseId));
   };
   
   const updateCourse = () => {
@@ -61,7 +100,9 @@ export default function Kambaz() {
           } />
           <Route path="/Courses/:cid/*" element={
             <ProtectedRoute>
-              <Courses />
+              <ProtectedCourseRoute>
+                <Courses />
+              </ProtectedCourseRoute>
             </ProtectedRoute>
           } />
           <Route path="/Calendar" element={<h1>Calendar</h1>} />

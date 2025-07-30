@@ -1,4 +1,4 @@
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash} from "react-icons/fa";
 import { BsPlus, BsPencil } from "react-icons/bs";
 import { IoEllipsisVertical } from "react-icons/io5";
 import GreenCheckmark from "./GreenCheckmark";

@@ -6,7 +6,7 @@ import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import ModulesControls from "./ModulesControls";
 import CourseStatus from "../Home/Status";
-import React, { useState, useReducer } from "react";
+import  { useState, useReducer } from "react";
 
 function modulesReducer(state: any[], action: any) {
   switch (action.type) {
@@ -121,7 +121,7 @@ export default function Modules() {
                   
                   {module.lessons && module.lessons.length > 0 && (
                     <ListGroup className="wd-lessons rounded-0">
-                      {module.lessons.map((lesson: any, index: number) => {
+                      {module.lessons.map((lesson: any) => {
                         const isActive = location.pathname === `/Kambaz/Courses/${cid}/Modules/${module._id}/Lessons/${lesson._id}`;
                         const isSection = lesson.name === lesson.name.toUpperCase() || 
                                          ['LEARNING OBJECTIVES', 'READING', 'SLIDES'].includes(lesson.name);
