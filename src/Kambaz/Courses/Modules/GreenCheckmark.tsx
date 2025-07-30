@@ -1,7 +1,25 @@
-import { FaCheckCircle, FaCircle } from "react-icons/fa";
-export default function GreenCheckmark() {
+import { FaCheckCircle } from "react-icons/fa";
+
+export default function GreenCheckmark({ module, updateModule }: {
+  module?: any;
+  updateModule?: (module: any) => void;
+}) {
+  const handleClick = () => {
+    if (module && module.editing && updateModule) {
+      // Save the module with editing set to false
+      updateModule({ ...module, editing: false });
+    }
+  };
+
   return (
-    <span className="me-1 position-relative">
-      <FaCheckCircle style={{ top: "2px" }} className="text-success me-1 position-absolute fs-5" />
-      <FaCircle className="text-white me-1 fs-6" />
-    </span>);}
+    <FaCheckCircle 
+      className="text-success me-2" 
+      style={{ 
+        fontSize: "20px",
+        cursor: module?.editing ? "pointer" : "default"
+      }}
+      onClick={handleClick}
+      title={module?.editing ? "Save Module" : "Published"}
+    />
+  );
+}

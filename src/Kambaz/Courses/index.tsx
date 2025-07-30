@@ -1,3 +1,4 @@
+// src/Kambaz/Courses/index.tsx
 import CourseNavigation from "./Navigation";
 import { Route, Routes, useLocation, useParams } from "react-router-dom";
 import Modules from "./Modules";
@@ -6,16 +7,16 @@ import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
 import { FaAlignJustify } from "react-icons/fa";
 import PeopleTable from "./People/Table";
-
-import * as db from "../Database";
+import { useSelector } from "react-redux";
 
 export default function Courses() {
   const { pathname } = useLocation();
   const { cid } = useParams();
+  const { courses } = useSelector((state: any) => state.coursesReducer);
   
-  // Find the course using the cid parameter from the database
-  const course = db.courses.find((course) => course._id === cid);
-
+  // Find the current course from Redux store
+  const course = courses.find((course: any) => course._id === cid);
+  
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
@@ -29,9 +30,11 @@ export default function Courses() {
         </div>
         <div className="flex-fill">
           <Routes>
+            <Route path="/" element={<Home />} />
             <Route path="Home" element={<Home />} />
             <Route path="Modules" element={<Modules />} />
             <Route path="Assignments" element={<Assignments />} />
+            <Route path="Assignments/new" element={<AssignmentEditor />} />
             <Route path="Assignments/:aid" element={<AssignmentEditor />} />
             <Route path="People" element={<PeopleTable />} />
           </Routes>
