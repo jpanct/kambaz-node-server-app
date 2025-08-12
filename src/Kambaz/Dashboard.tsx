@@ -50,8 +50,8 @@ export default function Dashboard({
     );
   };
   
-  // Determine which courses to display
-  const displayedCourses = showAllCourses || currentUser?.role === "FACULTY"
+  // Determine which courses to display - ADMIN and FACULTY see all courses
+  const displayedCourses = showAllCourses || currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN"
     ? courses 
     : courses.filter(course => isEnrolled(course._id));
   
@@ -76,8 +76,8 @@ export default function Dashboard({
       </div>
       <hr />
 
-      {/* Only show course management for FACULTY */}
-      {currentUser?.role === "FACULTY" && (
+      {/* Show course management for FACULTY and ADMIN */}
+      {(currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN") && (
         <>
           <h5>New Course
             <button 
@@ -123,7 +123,7 @@ export default function Dashboard({
                       variant="top" 
                       width="100%" 
                       height={160}
-                      style={{ opacity: enrolled || currentUser?.role === "FACULTY" ? 1 : 0.5 }}
+                      style={{ opacity: enrolled || currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN" ? 1 : 0.5 }}
                     />
                     <Card.Body className="d-flex flex-column">
                       <Card.Title className="wd-dashboard-course-title text-nowrap overflow-hidden">
@@ -134,8 +134,8 @@ export default function Dashboard({
                       </Card.Text>
                       
                       <div className="d-flex justify-content-between align-items-center mt-auto">
-                        {/* Go button for enrolled courses or faculty */}
-                        {(enrolled || currentUser?.role === "FACULTY") && (
+                        {/* Go button for enrolled courses, faculty, or admin */}
+                        {(enrolled || currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN") && (
                           <Link to={`/Kambaz/Courses/${course._id}/Home`} className="text-decoration-none">
                             <Button variant="primary">Go</Button>
                           </Link>
@@ -168,8 +168,8 @@ export default function Dashboard({
                           )
                         )}
                         
-                        {/* Faculty Edit/Delete buttons */}
-                        {currentUser?.role === "FACULTY" && (
+                        {/* Faculty and Admin Edit/Delete buttons */}
+                        {(currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN") && (
                           <div className="ms-auto">
                             <button 
                               id="wd-edit-course-click"

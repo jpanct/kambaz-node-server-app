@@ -1,7 +1,8 @@
+// src/Kambaz/Account/Signin.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { setCurrentUser } from "./reducer";
-import { useDispatch } from "react-redux";
 import * as db from "../Database";
 
 export default function Signin() {
@@ -10,82 +11,71 @@ export default function Signin() {
     password: ""
   });
   const [error, setError] = useState("");
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { users } = useSelector((state: any) => state.accountReducer);
   
   const signin = () => {
-    const user = db.users.find(
-      (u: any) => u.username === credentials.username && u.password === credentials.password
-    );
-    
-    if (!user) {
-      setError("Invalid username or password");
+    if (!credentials.username || !credentials.password) {
+      setError("Please enter username and password");
       return;
     }
     
-    setError("");
-    dispatch(setCurrentUser(user));
-    navigate("/Kambaz/Dashboard");
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      signin();
+    // First check Redux state
+    let user = users?.find((u: any) => 
+      (u.username === credentials.username || u.loginId === credentials.username) && 
+      u.password === credentials.password
+    );
+    
+    // If not in Redux, check database directly
+    if (!user) {
+      user = db.users.find((u: any) => 
+        (u.username === credentials.username || u.loginId === credentials.username) && 
+        u.password === credentials.password
+      );
+    }
+    
+    if (user) {
+      dispatch(setCurrentUser(user));
+      navigate("/Kambaz/Dashboard");
+    } else {
+      setError("Invalid username or password");
     }
   };
   
   return (
-    <div id="wd-signin-screen" className="d-flex justify-content-center" style={{ marginTop: "50px" }}>
-      <div className="card" style={{ width: "400px" }}>
-        <div className="card-body p-4">
-          <h3 className="mb-4 text-center">Sign in</h3>
-          
-          {error && (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-          )}
-          
-          <div className="mb-3">
-            <input 
-              className="form-control"
-              placeholder="username"
-              id="wd-username"
-              value={credentials.username}
-              onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-              onKeyPress={handleKeyPress}
-            />
-          </div>
-          
-          <div className="mb-3">
-            <input 
-              className="form-control"
-              placeholder="password"
-              type="password"
-              id="wd-password"
-              value={credentials.password}
-              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-              onKeyPress={handleKeyPress}
-            />
-          </div>
-          
-          <div className="d-grid mb-3">
-            <button 
-              onClick={signin} 
-              id="wd-signin-btn" 
-              className="btn btn-primary"
-            > 
-              Sign in 
-            </button>
-          </div>
-          
-          <div className="text-center">
-            <Link id="wd-signup-link" to="/Kambaz/Account/Signup">
-              Don't have an account? Sign up
-            </Link>
-          </div>
+    <div className="wd-signin-screen p-4">
+      <h1>Sign in</h1>
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
         </div>
-      </div>
+      )}
+      <input
+        value={credentials.username}
+        onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+        className="form-control mb-2"
+        placeholder="Username"
+        id="wd-username"
+      />
+      <input
+        value={credentials.password}
+        onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+        className="form-control mb-2"
+        placeholder="Password"
+        type="password"
+        id="wd-password"
+      />
+      <button 
+        onClick={signin} 
+        className="btn btn-primary w-100 mb-2"
+        id="wd-signin-btn"
+      >
+        Sign in
+      </button>
+      <Link to="/Kambaz/Account/Signup" id="wd-signup-link">
+        Don't have an account? Sign up
+      </Link>
     </div>
   );
 }

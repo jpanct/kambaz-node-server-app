@@ -4,7 +4,6 @@ import Dashboard from "./Dashboard";
 import KambazNavigation from "./Navigation";
 import Courses from "./Courses";
 import "./styles.css";
-import * as db from "./Database";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import ProtectedRoute from "./Account/ProtectedRoute";
@@ -12,6 +11,11 @@ import {
   removeEnrollmentsForCourse, 
   autoEnrollStudent 
 } from "./Enrollments/reducer";
+import { 
+  addCourse as addCourseAction,
+  deleteCourse as deleteCourseAction,
+  updateCourse as updateCourseAction
+} from "./Courses/reducer";
 
 // Protected Course Route Component (inline)
 function ProtectedCourseRoute({ children }: { children: React.ReactNode }) {
@@ -19,8 +23,8 @@ function ProtectedCourseRoute({ children }: { children: React.ReactNode }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const { enrollments } = useSelector((state: any) => state.enrollmentReducer);
   
-  // Faculty can access all courses
-  if (currentUser?.role === "FACULTY") {
+  // Faculty and Admin can access all courses
+  if (currentUser?.role === "FACULTY" || currentUser?.role === "ADMIN") {
     return <>{children}</>;
   }
   
@@ -38,12 +42,23 @@ function ProtectedCourseRoute({ children }: { children: React.ReactNode }) {
 
 export default function Kambaz() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { courses } = useSelector((state: any) => state.coursesReducer);
   const dispatch = useDispatch();
   
-  const [courses, setCourses] = useState<any[]>(db.courses);
+  // Debug logs moved here
+  console.log("=== KAMBAZ DEBUG ===");
+  console.log("Current User:", currentUser);
+  console.log("User Role:", currentUser?.role);
+  console.log("Courses from Redux:", courses);
+  console.log("Number of courses:", courses?.length);
+  
   const [course, setCourse] = useState<any>({
-    _id: "", name: "New Course", number: "New Number",
-    startDate: "2023-09-10", endDate: "2023-12-15", description: "New Description",
+    _id: "", 
+    name: "New Course", 
+    number: "New Number",
+    startDate: "2023-09-10", 
+    endDate: "2023-12-15", 
+    description: "New Description",
   });
   
   // Auto-enroll new students when they first load
@@ -54,29 +69,24 @@ export default function Kambaz() {
   }, [currentUser, courses, dispatch]);
   
   const addNewCourse = () => {
-    setCourses([...courses, { ...course, _id: new Date().getTime().toString() }]);
+    dispatch(addCourseAction(course));
     setCourse({
-      _id: "", name: "New Course", number: "New Number",
-      startDate: "2023-09-10", endDate: "2023-12-15", description: "New Description",
+      _id: "", 
+      name: "New Course", 
+      number: "New Number",
+      startDate: "2023-09-10", 
+      endDate: "2023-12-15", 
+      description: "New Description",
     });
   };
   
   const deleteCourse = (courseId: any) => {
-    setCourses(courses.filter((course) => course._id !== courseId));
-    // Also remove enrollments for deleted course
+    dispatch(deleteCourseAction(courseId));
     dispatch(removeEnrollmentsForCourse(courseId));
   };
   
   const updateCourse = () => {
-    setCourses(
-      courses.map((c) => {
-        if (c._id === course._id) {
-          return course;
-        } else {
-          return c;
-        }
-      })
-    );
+    dispatch(updateCourseAction(course));
   };
 
   return (
@@ -85,8 +95,8 @@ export default function Kambaz() {
       <div className="wd-main-content-offset p-3">
         <Routes>
           <Route path="/" element={<Navigate to="Dashboard" />} />
-          <Route path="/Account/*" element={<Account />} />
-          <Route path="/Dashboard" element={
+          <Route path="Account/*" element={<Account />} />
+          <Route path="Dashboard" element={
             <ProtectedRoute>
               <Dashboard
                 courses={courses}
@@ -98,15 +108,15 @@ export default function Kambaz() {
               />
             </ProtectedRoute>
           } />
-          <Route path="/Courses/:cid/*" element={
+          <Route path="Courses/:cid/*" element={
             <ProtectedRoute>
               <ProtectedCourseRoute>
                 <Courses />
               </ProtectedCourseRoute>
             </ProtectedRoute>
           } />
-          <Route path="/Calendar" element={<h1>Calendar</h1>} />
-          <Route path="/Inbox" element={<h1>Inbox</h1>} />
+          <Route path="Calendar" element={<h1>Calendar</h1>} />
+          <Route path="Inbox" element={<h1>Inbox</h1>} />
         </Routes>
       </div>
     </div>
