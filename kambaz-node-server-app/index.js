@@ -10,50 +10,15 @@ import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
 import mongoose from "mongoose";
 
-
-const addNewCourse = async () => {
-   const newCourse = await courseClient.createCourse(course);
-   setCourses([...courses, newCourse]);
- };
-
 const app = express();
-
-app.get('/api/test-db', async (req, res) => {
-  try {
-    const courseCount = await mongoose.connection.db.collection('courses').countDocuments();
-    res.json({
-      connected: mongoose.connection.readyState === 1,
-      database: mongoose.connection.name,
-      courseCount: courseCount,
-      connectionString: mongoose.connection.host
-    });
-  } catch (error) {
-    res.json({ error: error.message });
-  }
-});
-
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'API is working!' });
-});
-
-app.get('/api/debug/db', async (req, res) => {
-  try {
-    const collections = await mongoose.connection.db.listCollections().toArray();
-    const courseCount = await mongoose.connection.db.collection('courses').countDocuments();
-    
-    res.json({
-      connected: mongoose.connection.readyState === 1,
-      database: mongoose.connection.name,
-      collections: collections.map(c => c.name),
-      courseCount: courseCount
-    });
-  } catch (error) {
-    res.json({ error: error.message });
-  }
-});
-
 const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz"
 mongoose.connect(CONNECTION_STRING);
+//
+mongoose.connection.on('connected', () => {
+  console.log('Connected to MongoDB:', CONNECTION_STRING);
+  console.log('Database name:', mongoose.connection.name);
+});
+//
 app.use(
   cors({
    credentials: true,

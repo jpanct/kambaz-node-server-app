@@ -2,8 +2,6 @@
 import * as dao from "./dao.js";
 
 export default function AssignmentRoutes(app) {
-
-  
   // Create a new assignment for a course
   app.post("/api/courses/:cid/assignments", (req, res) => {
     try {

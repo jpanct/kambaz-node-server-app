@@ -1,11 +1,5 @@
 // kambaz-node-server-app/Kambaz/Enrollments/dao.js
 import db from "../Database/index.js";
-import model from "./model.js";
-
-export async function findCoursesForUser(userId) {
-  const enrollments = await model.find({ user: userId }).populate("course");
-  return enrollments.map((enrollment) => enrollment.course);
-}
 
 // Find all enrollments
 export const findAllEnrollments = () => {
@@ -29,17 +23,47 @@ export const isUserEnrolled = (userId, courseId) => {
   );
 };
 
-export function enrollUserInCourse(user, course) {
-  const newEnrollment = { user, course, _id: `${user}-${course}` };
-  return model.create(newEnrollment);
-}
+// Enroll a user in a course
+export const enrollUserInCourse = (userId, courseId) => {
+  // Check if already enrolled
+  if (isUserEnrolled(userId, courseId)) {
+    throw new Error("User is already enrolled in this course");
+  }
 
-export function unenrollUserFromCourse(user, course) {
-  return model.deleteOne({ user, course });
-}
-export const findUsersForCourse = async (courseId) => {
-  const enrollments = await enrollmentModel.find({ course: courseId });
-  const userIds = enrollments.map(e => e.user);
-  const users = await userModel.find({ _id: { $in: userIds } });
-  return users;
+  const newEnrollment = {
+    _id: new Date().getTime().toString(),
+    user: userId,
+    course: courseId,
+  };
+  
+  db.enrollments.push(newEnrollment);
+  return newEnrollment;
+};
+
+// Unenroll a user from a course
+export const unenrollUserFromCourse = (userId, courseId) => {
+  const index = db.enrollments.findIndex(
+    (enrollment) => enrollment.user === userId && enrollment.course === courseId
+  );
+  
+  if (index === -1) {
+    throw new Error("Enrollment not found");
+  }
+  
+  db.enrollments.splice(index, 1);
+  return { success: true };
+};
+
+// Get all courses for a user (with course details)
+export const findCoursesForUser = (userId) => {
+  const userEnrollments = db.enrollments.filter((e) => e.user === userId);
+  const courseIds = userEnrollments.map((e) => e.course);
+  return db.courses.filter((course) => courseIds.includes(course._id));
+};
+
+// Get all users for a course (with user details)
+export const findUsersForCourse = (courseId) => {
+  const courseEnrollments = db.enrollments.filter((e) => e.course === courseId);
+  const userIds = courseEnrollments.map((e) => e.user);
+  return db.users.filter((user) => userIds.includes(user._id));
 };
