@@ -4,6 +4,7 @@ import * as courseDao from "../Courses/dao.js";
 import mongoose from "mongoose";
 
 export default function UserRoutes(app) {
+  
 const findAllUsers = async (req, res) => {
   try {
     console.log('=== DEBUG INFO ===');
@@ -40,7 +41,25 @@ const findAllUsers = async (req, res) => {
   };
 
 
-
+ const findCoursesForUser = async (req, res) => {
+   const currentUser = req.session["currentUser"];
+   if (!currentUser) {
+     res.sendStatus(401);
+     return;
+   }
+   if (currentUser.role === "ADMIN") {
+     const courses = await courseDao.findAllCourses();
+     res.json(courses);
+     return;
+   }
+   let { uid } = req.params;
+   if (uid === "current") {
+     uid = currentUser._id;
+   }
+   const courses = await enrollmentsDao.findCoursesForUser(uid);
+   res.json(courses);
+ };
+ app.get("/api/users/:uid/courses", findCoursesForUser);
   
   // Delete a user
   const deleteUser = async (req, res) => {

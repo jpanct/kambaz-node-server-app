@@ -1,45 +1,54 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { modules } from "../../Database";
-const initialState = {
-  modules: modules,
+// src/Kambaz/Modules/reducer.ts
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+
+interface Module {
+  _id: string;
+  name: string;
+  description?: string;
+  course: string;
+  lessons?: any[];
+  editing?: boolean;
+}
+
+interface ModulesState {
+  modules: Module[];
+}
+
+const initialState: ModulesState = {
+  modules: [],
 };
+
 const modulesSlice = createSlice({
   name: "modules",
   initialState,
   reducers: {
-    addModule: (state, { payload: module }) => {
-      const newModule: any = {
-        _id: uuidv4(),
-        lessons: [],
-        name: module.name,
-        course: module.course,
-      };
-      state.modules = [...state.modules, newModule] as any;
+       setModules: (state, { payload: modules }) => {
+     state.modules = modules;
+   },
+    addModule: (state, action: PayloadAction<Module>) => {
+      state.modules.push(action.payload);
     },
-    deleteModule: (state, { payload: moduleId }) => {
+    deleteModule: (state, action: PayloadAction<string>) => {
       state.modules = state.modules.filter(
-        (m: any) => m._id !== moduleId);
+        (m) => m._id !== action.payload
+      );
     },
-    updateModule: (state, { payload: module }) => {
-      state.modules = state.modules.map((m: any) =>
-        m._id === module._id ? module : m
-      ) as any;
+    updateModule: (state, action: PayloadAction<Module>) => {
+      const index = state.modules.findIndex(m => m._id === action.payload._id);
+      if (index !== -1) {
+        state.modules[index] = action.payload;
+      }
     },
-    editModule: (state, { payload: moduleId }) => {
-      state.modules = state.modules.map((m: any) =>
-        m._id === moduleId ? { ...m, editing: true } : m
-      ) as any;
+    editModule: (state, action: PayloadAction<string>) => {
+      const module = state.modules.find(m => m._id === action.payload);
+      if (module) {
+        module.editing = true;
+      }
     },
   },
 });
-export const { addModule, deleteModule, updateModule, editModule } =
+
+export const { setModules, addModule, deleteModule, updateModule, editModule } =
   modulesSlice.actions;
+
 export default modulesSlice.reducer;
-function uuidv4(): string {
-    // Generates a RFC4122 version 4 UUID
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}

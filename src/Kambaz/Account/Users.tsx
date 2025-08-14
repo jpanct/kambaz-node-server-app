@@ -1,6 +1,6 @@
 // src/Kambaz/Users/index.tsx
-import { useState, useEffect } from "react";
-import { useParams } from "react-router";
+import {  useEffect } from "react";
+
 import { useDispatch, useSelector } from "react-redux";
 import PeopleTable from "../Courses/People/Table";
 import * as client from "./client";

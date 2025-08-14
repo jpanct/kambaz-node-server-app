@@ -1,36 +1,24 @@
-// src/Kambaz/Courses/People/client.ts
 import axios from "axios";
+const axiosWithCredentials = axios.create({ withCredentials: true });
+const REMOTE_SERVER = import.meta.env.VITE_REMOTE_SERVER;
+const COURSES_API = `${REMOTE_SERVER}/api/courses`;
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4000/api";
-const USERS_API = `${API_BASE}/users`;
-
-export const findAllUsers = async () => {
-  const response = await axios.get(USERS_API);
-  return response.data;
+export const fetchAllCourses = async () => {
+  const { data } = await axiosWithCredentials.get(COURSES_API);
+  return data;
 };
 
-export const findUserById = async (userId: string) => {
-  const response = await axios.get(`${USERS_API}/${userId}`);
-  return response.data;
+export const createCourse = async (course: any) => {
+  const { data } = await axiosWithCredentials.post(COURSES_API, course);
+  return data;
 };
 
-export const findUsersForCourse = async (courseId: string) => {
-  const response = await axios.get(`${API_BASE}/courses/${courseId}/users`);
-  return response.data;
+export const deleteCourse = async (id: string) => {
+  const { data } = await axiosWithCredentials.delete(`${COURSES_API}/${id}`);
+  return data;
 };
 
-export const deleteUser = async (userId: string) => {
-  const response = await axios.delete(`${USERS_API}/${userId}`);
-  return response.data;
-};
-
-export const updateUser = async (user: any) => {
-  const response = await axios.put(`${USERS_API}/${user._id}`, user);
-  return response.data;
-};
-
-
-export const createUser = async (user: any) => {
-  const response = await axios.post(USERS_API, user);
-  return response.data;
+export const updateCourse = async (course: any) => {
+  const { data } = await axiosWithCredentials.put(`${COURSES_API}/${course._id}`, course);
+  return data;
 };

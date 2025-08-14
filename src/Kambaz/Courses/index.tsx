@@ -6,17 +6,17 @@ import Home from "./Home";
 import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
 import { FaAlignJustify } from "react-icons/fa";
-import PeopleTable from "./People/Table";
 import PeopleDetails from "./People/Details";
 import { useSelector } from "react-redux";
-import { useState, useEffect } from "react";
+import {  useEffect } from "react";
+import People from "./People";
 export default function Courses() {
   const { pathname } = useLocation();
   const { cid } = useParams();
   const { courses } = useSelector((state: any) => state.coursesReducer);
   const { enrollments } = useSelector((state: any) => state.enrollmentReducer);
   const {  users: allUsers } = useSelector((state: any) => state.accountReducer);
-  const [users, setUsers] = useState<any[]>([]);
+
   
   // Find the current course from Redux store
   const course = courses.find((course: any) => course._id === cid);
@@ -47,7 +47,6 @@ export default function Courses() {
       index === self.findIndex((u) => u._id === user._id)
     );
     
-    setUsers(uniqueUsers);
     
     console.log("Course ID:", cid);
     console.log("Course Enrollments:", courseEnrollments);
@@ -81,7 +80,7 @@ export default function Courses() {
             <Route path="Assignments" element={<Assignments />} />
             <Route path="Assignments/new" element={<AssignmentEditor />} />
             <Route path="Assignments/:aid" element={<AssignmentEditor />} />
-            <Route path="People" element={<PeopleTable users={users} fetchUsers={fetchUsers} />} />
+            <Route path="People" element={<People/>} />
             <Route path="People/:uid" element={<PeopleDetails />} />
           </Routes>
         </div>

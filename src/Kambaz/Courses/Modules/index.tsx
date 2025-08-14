@@ -1,58 +1,66 @@
 import { useParams, useLocation, Link } from "react-router-dom";
-import * as db from "../../Database";
 import { BsGripVertical } from "react-icons/bs";
-import { FormControl, ListGroup } from "react-bootstrap";
+import {  ListGroup } from "react-bootstrap";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import ModulesControls from "./ModulesControls";
 import CourseStatus from "../Home/Status";
-import  { useState, useReducer } from "react";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+// Fix this import path - go up two levels to get to Kambaz/Modules
+import * as modulesClient from "./client"; // This should be the modules client
+import * as courseClient from "../client";
+import { setModules, addModule, deleteModule, editModule, updateModule } from "./reducer";
 
-function modulesReducer(state: any[], action: any) {
-  switch (action.type) {
-    case "ADD_MODULE":
-      return [...state, action.module];
-    case "DELETE_MODULE":
-      return state.filter((m) => m._id !== action.moduleId);
-    case "UPDATE_MODULE":
-      return state.map((m) => m._id === action.module._id ? action.module : m);
-    case "EDIT_MODULE":
-      return state.map((m) => m._id === action.moduleId ? { ...m, editing: true } : m);
-    default:
-      return state;
-  }
-}
-
+// ... rest of your component
 export default function Modules() {
   const { cid } = useParams();
   const location = useLocation();
-  const [modules, dispatch] = useReducer(modulesReducer, db.modules);
+  const dispatch = useDispatch();
+  
+  // Get modules from Redux store
+  const { modules } = useSelector((state: any) => state.modulesReducer);
   const [moduleName, setModuleName] = useState("");
   
-  const addModule = () => {
-    dispatch({
-      type: "ADD_MODULE",
-      module: {
-        _id: uuidv4(),
-        name: moduleName,
-        description: "",
-        course: cid ?? "",
-        lessons: []
+  const fetchModulesForCourse = async () => {
+   const modules = await courseClient.findModulesForCourse(cid!);
+   dispatch(setModules(modules));
+ };
+ useEffect(() => {
+   fetchModulesForCourse();
+ }, [cid]);
+
+   const addModuleHandler = async () => {
+   const newModule = await courseClient.createModuleForCourse(cid!, {
+     name: moduleName,
+     course: cid,
+   });
+   dispatch(addModule(newModule));
+   setModuleName("");
+ };
+  const updateModuleHandler = async (module: any) => {
+   await modulesClient.updateModule(module._id, module);
+   dispatch(updateModule(module));
+ };
+
+  // Updated handler to post to server
+ const deleteModuleHandler = async (moduleId: string) => {
+   await modulesClient.deleteModule(moduleId);
+   dispatch(deleteModule(moduleId));
+ };
+
+
+  // UPDATE THIS FUNCTION to save to server when editing is done
+  const handleUpdateModule = async (module: any) => {
+    try {
+      // If module is being saved (editing = false), update on server
+      if (module.editing === false && module._id) {
+        await modulesClient.updateModule(module._id, module);
       }
-    });
-    setModuleName("");
-  };
-
-  const deleteModule = (moduleId: string) => {
-    dispatch({ type: "DELETE_MODULE", moduleId });
-  };
-
-  const editModule = (moduleId: string) => {
-    dispatch({ type: "EDIT_MODULE", moduleId });
-  };
-
-  const updateModule = (module: any) => {
-    dispatch({ type: "UPDATE_MODULE", module });
+      dispatch(updateModule(module));
+    } catch (error) {
+      console.error("Error updating module:", error);
+    }
   };
 
   const addLesson = (moduleId: string) => {
@@ -64,20 +72,22 @@ export default function Modules() {
         description: "",
         module: moduleId
       };
-      dispatch({
-        type: "UPDATE_MODULE",
-        module: { ...module, lessons: [...(module.lessons || []), newLesson] }
-      });
+      dispatch(updateModule({ 
+        ...module, 
+        lessons: [...(module.lessons || []), newLesson] 
+      }));
     }
   };
+
 
   return (
     <div className="row">
       <div className="col-12 col-xl-9">
         <ModulesControls 
+            addModule={addModuleHandler}
           moduleName={moduleName} 
           setModuleName={setModuleName} 
-          addModule={addModule} 
+          
         />
         <br /><br /><br />
         
@@ -96,25 +106,22 @@ export default function Modules() {
                       <BsGripVertical className="me-2 fs-3" />
                       {!module.editing && module.name}
                       {module.editing && (
-                        <FormControl 
-                          className="w-50 d-inline-block"
-                          value={module.name || ""}
-                          onChange={(e) => updateModule({ ...module, name: e.target.value })}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              updateModule({ ...module, editing: false });
-                            }
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      )}
+         <input onChange={(e) =>
+                  updateModuleHandler({ ...module, name: e.target.value }) }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    updateModuleHandler({ ...module, editing: false });
+                  }
+                }}
+                value={module.name}/>
+        )}
                     </div>
                     <ModuleControlButtons
                       module={module}
                       moduleId={module._id}
-                      deleteModule={deleteModule}
-                      editModule={editModule}
-                      updateModule={updateModule}
+                      deleteModule={(moduleId) => deleteModuleHandler(moduleId)}
+                      editModule={(moduleId) => dispatch(editModule(moduleId))} 
+                      updateModule={handleUpdateModule}
                       addLesson={addLesson}
                     />
                   </div>
